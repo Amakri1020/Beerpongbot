@@ -1,12 +1,17 @@
 #define ECHOPIN 4
 #define TRIGPIN 3
 #define LEDPIN 13
-#define SERVOPIN 12
+#define EYESPIN 12
+#define VERPIN 11
+#define HORPIN 10
 
 #include <Servo.h>
 
-Servo myservo;
+Servo eyes;
+Servo vertical;
+Servo horizontal;
 int pos = 0;
+int posVer, posHor;
 long duration, distance;
 
 void setup(){
@@ -14,7 +19,9 @@ void setup(){
   pinMode(ECHOPIN, INPUT);
   pinMode(TRIGPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
-  myservo.attach(SERVOPIN);
+  eyes.attach(EYESPIN);
+  vertical.attach(VERPIN);
+  horizontal.attach(HORPIN);
 }
 
 String Print() {
@@ -23,6 +30,7 @@ String Print() {
   Serial.print(",");
   Serial.print(pos);
   Serial.print(".\n");
+  delay(100);
 
 }
 
@@ -32,35 +40,65 @@ float Distance(){
     digitalWrite(TRIGPIN, LOW);
     delayMicroseconds(2);
     digitalWrite(TRIGPIN, HIGH);
-    delayMicroseconds(100);
+    delayMicroseconds(10);
     digitalWrite(TRIGPIN, LOW);
     duration = pulseIn(ECHOPIN, HIGH);
     distance += (duration/(2*29.1));
   }
-  //distance = distance/100;
+  //distance = distance/1;
   return distance;
 }
 
-void loop(){
-  myservo.write(60);
-  
-  for(pos = 60; pos < 120; pos+=3){
-    myservo.write(pos);
-    distance = Distance();
-    if(distance > 10){
-      Print();
-    }
-    delay(100);
+void loop(){ 
+  Scan();
+  Serial.println(Aim());
+  Serial.println(Wait());
+  Serial.println(Fire());
+}
+
+String Aim(){
+ return ("Aiming...");
+}
+
+String Fire(){
+ return "Fire!";
+}
+
+String Wait(){
+  char FIRE;
+  Serial.println("Waiting for command...");
+  while (FIRE != 'F'){
+    FIRE = Serial.read();
+    //horizontal.write(posHor);
+    //vertical.write(posVer);
   }
-  delay(1000);
+  return "Firing!";
+}
+
+
+void Scan(){
+  Serial.println("Scanning.....");
+  eyes.write(75);
   
-  for(pos = 120; pos > 60; pos-=3){
-    myservo.write(pos);
-    distance = Distance();
-    if(distance > 10){
-      Print();
+  for(int cycle = 0; cycle<3; cycle++){
+    for(pos = 75; pos < 105; pos+=3){
+      eyes.write(pos);
+      distance = Distance();
+      if(distance > 10){
+        Print();
+      }
+      delay(10);
     }
-  delay(100);
+    delay(1000);
+    
+    for(pos = 105; pos > 75; pos-=3){
+      eyes.write(pos);
+      distance = Distance();
+      if(distance > 10){
+        Print();
+      }
+    delay(10);
+    }
   }
-  delay(1000);
+  delay(5000);
 }
