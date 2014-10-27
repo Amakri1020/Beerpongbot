@@ -22,7 +22,7 @@ void setup()
  line(250,250,120,0);
  line(250,250,400,0);
 
-port = new Serial(this, "COM3", 9600);
+port = new Serial(this, "COM4", 9600);
 port.bufferUntil('.');
 }
 
